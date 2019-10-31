@@ -1,0 +1,6 @@
+"0","#time to put points on the map"
+"0","WBmap<-ggmap(basemap)+ geom_point(data=Wall_Branch, aes(Longitude, Latitude)) +"
+"0","  geom_point(data = Wall_Branch, aes(Longitude, Latitude), color= ""black"", size = 0.1) +"
+"0","  theme(axis.title = element_text(face=""bold"")) + labs(x=""Longitude"", y=""Latitude"") +"
+"0","  theme(panel.border = element_rect(colour = ""black"", fill=NA, size=1)) + theme_classic()"
+"0","plot(WBmap)"

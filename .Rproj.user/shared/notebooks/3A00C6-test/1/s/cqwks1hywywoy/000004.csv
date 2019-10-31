@@ -1,0 +1,2 @@
+"0",""
+"0","WB_sep <- split(x = WB_spdf, f = WB_spdf$Name, drop = FALSE)"

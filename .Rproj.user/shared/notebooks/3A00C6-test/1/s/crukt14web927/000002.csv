@@ -1,0 +1,8 @@
+"0","basemap<- get_map((location = "" 2561 Alex Overlook Way"
+"0","Clarksville, TN 37043, 36.497818, -87.267428""), zoom=15, maptype = ""satellite"")"
+"2","Source : https://maps.googleapis.com/maps/api/staticmap?center=%202561%20Alex%20Overlook%20Way%0AClarksville,%20TN%2037043,%2036.497818,%20-87.267428&zoom=15&size=640x640&scale=2&maptype=satellite&language=en-EN&key=xxx-txHXwSLjB-UURgX1eLzhNVcsXMRg
+"
+"2","Source : https://maps.googleapis.com/maps/api/geocode/json?address=2561+Alex+Overlook+Way%0AClarksville,+TN+37043,+36.497818,+-87.267428&key=xxx-txHXwSLjB-UURgX1eLzhNVcsXMRg
+"
+"0","ggmap(basemap)"
+"0",""

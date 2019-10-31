@@ -1,0 +1,7 @@
+#remove these
+*.jpg
+*.RData
+*.Rhistory
+*.Rproj
+/Index_files
+index.Rmd

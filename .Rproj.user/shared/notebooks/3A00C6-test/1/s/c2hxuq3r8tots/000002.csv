@@ -1,0 +1,3 @@
+"0","ggsave(""WBMapKDEimage.jpg"", plot = WBkde, dpi = 300, limitsize = TRUE)"
+"2","Saving 7 x 7 in image
+"

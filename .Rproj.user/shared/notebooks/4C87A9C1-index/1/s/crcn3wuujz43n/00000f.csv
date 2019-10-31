@@ -1,0 +1,8 @@
+"0","register_google(""AIzaSyDKCi-txHXwSLjB-UURgX1eLzhNVcsXMRg"")"
+"0","basemap<- get_map(location = ""1539 Dry Creek Rd"
+"0","Ashland City, TN 37015"", zoom=15)"
+"2","Source : https://maps.googleapis.com/maps/api/staticmap?center=1539%20Dry%20Creek%20Rd%0AAshland%20City,%20TN%2037015&zoom=15&size=640x640&scale=2&maptype=terrain&language=en-EN&key=xxx-txHXwSLjB-UURgX1eLzhNVcsXMRg
+"
+"2","Source : https://maps.googleapis.com/maps/api/geocode/json?address=1539+Dry+Creek+Rd%0AAshland+City,+TN+37015&key=xxx-txHXwSLjB-UURgX1eLzhNVcsXMRg
+"
+"0","ggmap(basemap)"

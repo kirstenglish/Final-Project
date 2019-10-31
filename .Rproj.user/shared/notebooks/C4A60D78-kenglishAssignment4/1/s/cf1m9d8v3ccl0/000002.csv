@@ -1,0 +1,30 @@
+"0","```r
+newmountain.lm <- lm(testScore ~ bodyLength2 + mountainRange, data = dragons)
+summary(newmountain.lm)
+```"
+"1","
+Call:
+lm(formula = testScore ~ bodyLength2 + mountainRange, data = dragons)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-52.263  -9.926   0.361   9.994  44.488 
+
+Coefficients:
+                      Estimate Std. Error t value Pr(>|t|)    
+(Intercept)            23.3818     2.5792   9.065  < 2e-16 ***
+bodyLength2             0.2055     1.2927   0.159  0.87379    
+mountainRangeCentral   36.5828     3.5993  10.164  < 2e-16 ***
+mountainRangeEmmental  16.2092     3.6966   4.385 1.43e-05 ***
+mountainRangeJulian    45.1147     4.1901  10.767  < 2e-16 ***
+mountainRangeLigurian  17.7478     3.6736   4.831 1.84e-06 ***
+mountainRangeMaritime  49.8813     3.1392  15.890  < 2e-16 ***
+mountainRangeSarntal   41.9784     3.1972  13.130  < 2e-16 ***
+mountainRangeSouthern   8.5196     2.7313   3.119  0.00192 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 14.96 on 471 degrees of freedom
+Multiple R-squared:  0.5843,	Adjusted R-squared:  0.5773 
+F-statistic: 82.76 on 8 and 471 DF,  p-value: < 2.2e-16
+"

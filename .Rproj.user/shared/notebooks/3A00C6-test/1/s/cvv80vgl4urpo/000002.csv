@@ -1,0 +1,4 @@
+"0","KDEmap<-DCmap +"
+"0","  stat_density2d(aes(x = Longitude, y = Latitude, fill = ..level..,alpha=..level..), bins = 10, geom = ""polygon"", data = DryCreek) +"
+"0","  scale_fill_gradient(low = ""red"", high = ""green"")+"
+"0","  ggtitle(""Dry Creek, TN"")"

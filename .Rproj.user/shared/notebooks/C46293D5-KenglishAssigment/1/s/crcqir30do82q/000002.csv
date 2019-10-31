@@ -1,0 +1,8 @@
+"0","```r
+# calculate variable importance weights
+importance(results)
+```"
+"1","                     Age_years Longitude Aspect Slope Latitude Elevation
+Sum of weights:      1.00      1.00      0.77   0.53  0.30     0.28     
+N containing models:   32        32        32     32    32       32     
+"

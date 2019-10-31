@@ -1,0 +1,2 @@
+"0","#although we don't have seperate species we need to let R know that all points are for one stream system and this will create a list of one"
+"0","DC_sep <- split(x = DC_spdf, f = DC_spdf$Name, drop = FALSE)"

@@ -1,0 +1,7 @@
+"0","```r
+qplot(bodyLength, testScore, data= dragons, 
+      geom= c(\"point\", \"smooth\"), method= \"lm\", main= \"No pooling analysis, all mountain ranges\",
+      xlab= \"Body Length\", ylab= \"Intelligence (Test Score)\", facets=.~mountainRange)+theme_bw()
+```"
+"1","Ignoring unknown parameters: method
+"

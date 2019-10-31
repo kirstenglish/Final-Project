@@ -1,0 +1,7 @@
+"0","```r
+qplot(bodyLength, testScore, data= dragons, 
+      geom= c(\"point\", \"smooth\"), method= \"lm\", main= \"Complete pooling analysis: All sites combined\",
+      xlab= \"Body Length\", ylab= \"Intelligence (Test Score)\")+theme_bw()
+```"
+"1","Ignoring unknown parameters: method
+"

@@ -1,0 +1,31 @@
+"0","```r
+dragons <- within(dragons, nesting <- factor(mountainRange:site))
+mixed.lmer2 <- lmer(testScore ~ bodyLength2 + (1|mountainRange) + (1|nesting), data = dragons)  
+summary(mixed.lmer2)
+```"
+"1","Linear mixed model fit by REML ['lmerMod']
+Formula: testScore ~ bodyLength2 + (1 | mountainRange) + (1 | nesting)
+   Data: dragons
+
+REML criterion at convergence: 3970.4
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.2425 -0.6752 -0.0117  0.6974  2.8812 
+
+Random effects:
+ Groups        Name        Variance Std.Dev.
+ nesting       (Intercept)  23.09    4.805  
+ mountainRange (Intercept) 327.56   18.099  
+ Residual                  208.58   14.442  
+Number of obs: 480, groups:  nesting, 24; mountainRange, 8
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept)   50.386      6.507   7.743
+bodyLength2    0.831      1.681   0.494
+
+Correlation of Fixed Effects:
+            (Intr)
+bodyLength2 0.000 
+"

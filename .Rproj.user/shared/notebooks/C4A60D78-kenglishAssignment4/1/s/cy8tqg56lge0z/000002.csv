@@ -1,0 +1,8 @@
+"0","```r
+(mm_plot <- ggplot(dragons, aes(x = bodyLength, y = testScore, colour = site)) +
+  facet_wrap(~mountainRange, nrow=3) +
+  geom_point() +
+  theme_classic() +
+  geom_line(data = cbind(dragons, pred = predict(mixed.lmer2)), aes(y = pred)) +
+  theme(legend.position = \"none\"))
+```"

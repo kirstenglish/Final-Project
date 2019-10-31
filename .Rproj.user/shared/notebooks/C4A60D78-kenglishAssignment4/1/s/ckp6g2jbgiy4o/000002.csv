@@ -1,0 +1,29 @@
+"0","```r
+mixed.lmer <- lmer(testScore ~ bodyLength2 + (1|mountainRange), data = dragons)
+summary(mixed.lmer)
+```"
+"1","Linear mixed model fit by REML ['lmerMod']
+Formula: testScore ~ bodyLength2 + (1 | mountainRange)
+   Data: dragons
+
+REML criterion at convergence: 3985.6
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.4815 -0.6513  0.0066  0.6685  2.9583 
+
+Random effects:
+ Groups        Name        Variance Std.Dev.
+ mountainRange (Intercept) 339.7    18.43   
+ Residual                  223.8    14.96   
+Number of obs: 480, groups:  mountainRange, 8
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept)  50.3860     6.5517   7.690
+bodyLength2   0.5377     1.2750   0.422
+
+Correlation of Fixed Effects:
+            (Intr)
+bodyLength2 0.000 
+"

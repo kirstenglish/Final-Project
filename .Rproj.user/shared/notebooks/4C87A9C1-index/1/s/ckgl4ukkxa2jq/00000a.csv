@@ -1,0 +1,6 @@
+"0","#time to put points on the map"
+"0","BHmap<-ggmap(basemap)+ geom_point(data=Big_Hollow, aes(Longitude, Latitude)) +"
+"0","  geom_point(data = Big_Hollow, aes(Longitude, Latitude), size = 0.1) +"
+"0","  theme(axis.title = element_text(face=""bold"")) + labs(x=""Longitude"", y=""Latitude"") +"
+"0","  theme(panel.border = element_rect(colour = ""black"", fill=NA, size=1)) + theme_bw()"
+"0","plot(BHmap)"

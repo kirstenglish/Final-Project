@@ -1,0 +1,24 @@
+"0","```r
+trees <- read_csv(\"~/Desktop/data R/sample tree growth data with locations.csv\")
+```"
+"1","Missing column names filled in: 'X1' [1]Parsed with column specification:
+cols(
+  X1 = [32mcol_double()[39m,
+  `Sample tree ID` = [31mcol_character()[39m,
+  Species = [31mcol_character()[39m,
+  Year = [32mcol_double()[39m,
+  Site = [31mcol_character()[39m,
+  Longitude = [32mcol_double()[39m,
+  Latitude = [32mcol_double()[39m,
+  Elevation = [32mcol_double()[39m,
+  Aspect = [32mcol_double()[39m,
+  Slope = [32mcol_double()[39m,
+  Stem_diameter_cm = [32mcol_double()[39m,
+  Age_years = [32mcol_double()[39m,
+  Ring_width_mm = [32mcol_double()[39m,
+  Date = [31mcol_character()[39m
+)
+"
+"0","```r
+View(trees)
+```"

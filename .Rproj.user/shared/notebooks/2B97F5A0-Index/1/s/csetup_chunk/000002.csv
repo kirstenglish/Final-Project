@@ -1,0 +1,21 @@
+"0","library(readr)"
+"0","library(ggplot2)"
+"0","library(MASS)"
+"0","library(OpenStreetMap)"
+"0","library(rgeos)"
+"0","library(ggfortify)"
+"0","library(sp)"
+"0","library(ks)"
+"0","library(raster)"
+"0","library(ggmap)"
+"0",""
+"0","DryCreek <- read_csv(""/Users/Kirstenglish/Desktop/Independent study/MAPS/Dry Creek.csv"")"
+"2","Parsed with column specification:
+cols(
+  Name = [31mcol_character()[39m,
+  Longitude = [32mcol_double()[39m,
+  Latitude = [32mcol_double()[39m,
+  Number = [32mcol_double()[39m
+)
+"
+"0","View(DryCreek)"

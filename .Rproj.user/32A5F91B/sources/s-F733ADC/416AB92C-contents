@@ -1,0 +1,399 @@
+---
+title: "Teritory Mapping of the Louisiana Waterthrush at three Tennesee locations"
+author: "Kirsten English"
+date: "10/30/2019"
+output: html_document
+---
+
+Abstract:
+  The goal of this study is to look at territory size of the Louisiana Waterthrush during breeding season at three locations; Wall Branch stream located in Rotary Park in Clarksville Tennessee 37040, Dry Creek located in Cheatham Wildlife Management Area in Ashland City Tennessee 37015, Big Hollow located in Beaman Park in Ashland City Tennessee 37015. Mapping these territories in these streams will show not only the territories of the Louisiana Waterthrush present but also possible areas of concentrated use that may aid in the location of their nesting sites. 
+
+
+
+```{r setup, include=FALSE}
+library(readr)
+library(ggplot2)
+library(MASS)
+library(OpenStreetMap)
+library(rgeos)
+library(ggfortify)
+library(sp)
+library(ks)
+library(raster)
+library(ggmap)
+
+DryCreek <- read_csv("/Users/Kirstenglish/Desktop/Independent study/MAPS/Dry Creek.csv")
+View(DryCreek)
+```
+
+
+We will be making KDE maps so we will need to register with google maps to use their satelite version of our map area. The link below is where a lot of the following code came from. https://cfss.uchicago.edu/notes/raster-maps-with-ggmap/
+<span style="color:blue">You must register for google maps to get an AI (I used the one year free trial for this and they don't auto charge once the year is over). OpenMapSource is another option as well if your java supports this. Once you have registered create your base map using google maps address or coordinates.</span>
+
+
+
+```{r Get basemap}
+register_google("AIzaSyDKCi-txHXwSLjB-UURgX1eLzhNVcsXMRg")
+basemap<- get_map(location = "1539 Dry Creek Rd
+Ashland City, TN 37015", zoom=15)
+ggmap(basemap)
+```
+
+<span style="color:blue">Next, we can put our LOWA encounter cooridinates on the basemap we just created.</span>
+
+
+```{r Base map with LOWAlocation points}
+DCmap<-ggmap(basemap)+ geom_point(data=DryCreek, aes(Longitude, Latitude)) +
+  geom_point(data = DryCreek, aes(Longitude, Latitude), size = 0.1) +
+  theme(axis.title = element_text(face="bold")) + labs(x="Longitude", y="Latitude") +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + theme_bw()
+plot(DCmap)
+```
+
+
+<span style="color:blue"> Now it's time to create KDE and MCP, but first we have to format a few things. It will be important to first put your data into SpatialPoints 
+we will be using CRS  (coordinate reference system) which is the format for most GPS data. The link below is where a lot of the following code came from.  https://mhallwor.github.io/_pages/activities_GenerateTerritories </span>
+
+```{r Spatial Points formatting}
+DCpts <- sp::SpatialPoints(coords = cbind(DryCreek$Longitude, DryCreek$Latitude),
+                                proj4string = sp::CRS("+init=epsg:4326"))
+head(DCpts)
+
+## put all the data into a single SpatialPointsDataFrame (spdf)
+DC_spdf <- sp::SpatialPointsDataFrame(DCpts, DryCreek)
+head(DC_spdf)
+#although we don't have seperate species we need to let R know that all points are for one stream system and this will create a list of one
+DC_sep <- split(x = DC_spdf, f = DC_spdf$Name, drop = FALSE)
+```
+
+<span style="color:blue"> Time to make the MCP.</span>
+
+```{r MCP}
+DCmcp <- lapply(DC_sep, FUN = function(x){rgeos::gConvexHull(x)})
+
+##this makes polygon from the list of one when we told R that all variables are from one stream system
+DCmcp <- mapply(DCmcp, names(DCmcp), 
+                  SIMPLIFY = FALSE,
+                  FUN = function(x,y){x@polygons[[1]]@ID <- y
+                  return(x)})
+
+DCmcp <- do.call(rbind,DCmcp)
+DCmcp <- SpatialPolygonsDataFrame(Sr = DCmcp,
+                                   data = data.frame(Bird = names(DCmcp)),
+                                   match.ID = FALSE)
+plot(DCmcp)
+```
+
+<span style="color:pink">Now that we have an MCP for the stream, onto KDE.</span>
+
+```{r KDE}
+## Step one: do least squares cross-validation to estimate bandwidth (you may get a warning message but keep going)
+bw <- lapply(DC_sep, FUN = function(x){ks::Hlscv(x@coords)})
+## Step two: generate kde
+
+DC_kde <-mapply(DC_sep,bw,
+                     SIMPLIFY = FALSE,
+                     FUN = function(x,y){
+                       raster(kde(x@coords,h=y))})
+# This code makes a custom function called getContour. 
+# Inputs:
+#    kde = kernel density estimate
+#    prob = probabily - default is 0.95
+
+getContour <- function(kde, prob = 0.95){
+  # set all values 0 to NA
+  kde[kde == 0]<-NA
+  # create a vector of raster values
+  kde_values <- raster::getValues(kde)
+  # sort values 
+  sortedValues <- sort(kde_values[!is.na(kde_values)],decreasing = TRUE)
+  # find cumulative sum up to ith location
+  sums <- cumsum(as.numeric(sortedValues))
+  # binary response is value in the probabily zone or not
+  p <- sum(sums <= prob * sums[length(sums)])
+  # Set values in raster to 1 or 0
+  kdeprob <- raster::setValues(kde, kde_values >= sortedValues[p])
+  # return new kde
+  return(kdeprob)}
+
+DC_95kde <- lapply(DC_kde,
+                    FUN = getContour,prob = 0.95)
+
+```
+
+<span style="color:pink">These next plots put MCP on top of KDE
+</span>
+```{r Map}
+plot(DC_kde[[1]])+
+plot(DCmcp[1,],add = TRUE)
+```
+<span style="color:blue"> Time to overlap KDE onto the base map. Code found from http://data-analytics.net/cep/Schedule_files/geospatial.html </span>
+
+
+```{r KDE with map}
+KDEmap<-DCmap +
+  stat_density2d(aes(x = Longitude, y = Latitude, fill = ..level..,alpha=..level..), bins = 10, geom = "polygon", data = DryCreek) +
+  scale_fill_gradient(low = "red", high = "green")+
+  ggtitle("Dry Creek, TN")
+```
+
+```{r, include=FALSE}
+ggsave("DCMapKDEimage.jpg", plot = KDEmap, dpi = 300, limitsize = TRUE)
+
+```
+
+![Compleated KDE Heatmap](/Users/Kirstenglish/Desktop/DCMapKDEimage.jpg)
+
+
+
+
+
+Big Hollow, TN
+
+```{r Big Hollow}
+Big_Hollow <- read_csv("/Users/Kirstenglish/Desktop/Big Hollow.csv")
+View(Big_Hollow)
+```
+
+
+
+Just like before, retrieve a basemap of your site location. 
+```{r Get BH basemap}
+basemap<- get_map(location = "Ridgetop Trail
+Ashland City, TN 37015", zoom=15)
+ggmap(basemap)
+
+```
+
+<span style="color:blue"> Put our LOWA encounter cooridinates on the basemap we just created.</span>
+
+```{r BH Base map with LOWAlocation points}
+#time to put points on the map
+BHmap<-ggmap(basemap)+ geom_point(data=Big_Hollow, aes(Longitude, Latitude)) +
+  geom_point(data = Big_Hollow, aes(Longitude, Latitude), size = 0.1) +
+  theme(axis.title = element_text(face="bold")) + labs(x="Longitude", y="Latitude") +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + theme_bw()
+plot(BHmap)
+```
+
+
+<span style="color:blue"> Put data into spatial points like before to be able to create the KDE and MCP.
+we will be using CRS  (coordinate reference system) which is the format for most GPS data.  </span>
+
+```{r SP formatting, include=FALSE}
+BHpts <- sp::SpatialPoints(coords = cbind(Big_Hollow$Longitude, Big_Hollow$Latitude),
+                           proj4string = sp::CRS("+init=epsg:4326"))
+head(BHpts)
+
+## put all the data into a single SpatialPointsDataFrame (spdf)
+BH_spdf <- sp::SpatialPointsDataFrame(BHpts, Big_Hollow)
+head(BH_spdf)
+
+#although we don't have seperate species we need to let R know that all points are for one stream system and this will create a list of one
+BH_sep <- split(x = BH_spdf, f = BH_spdf$Name, drop = FALSE)
+```
+
+<span style="color:blue"> Time to make the MCP.</span>
+
+```{r BH MCP}
+BHmcp <- lapply(BH_sep, FUN = function(x){rgeos::gConvexHull(x)})
+
+##this makes polygon from the list of one when we told R that all variables are from one stream system
+BHmcp <- mapply(BHmcp, names(BHmcp), 
+                SIMPLIFY = FALSE,
+                FUN = function(x,y){x@polygons[[1]]@ID <- y
+                return(x)})
+
+BHmcp <- do.call(rbind,BHmcp)
+BHmcp <- SpatialPolygonsDataFrame(Sr = BHmcp,
+                                  data = data.frame(Bird = names(BHmcp)),
+                                  match.ID = FALSE)
+plot(BHmcp)
+```
+
+<span style="color:pink">Now that we have an MCP for the stream, onto KDE.</span>
+
+```{r BH KDE, warning=FALSE}
+bw <- lapply(BH_sep, FUN = function(x){ks::Hlscv(x@coords)})
+## Step two: generate kde
+
+BH_kde <-mapply(BH_sep,bw,
+                SIMPLIFY = FALSE,
+                FUN = function(x,y){
+                  raster(kde(x@coords,h=y))})
+
+# This code makes a custom function called getContour. 
+# Inputs:
+#    kde = kernel density estimate
+#    prob = probabily - default is 0.95
+
+getContour <- function(kde, prob = 0.95){
+  # set all values 0 to NA
+  kde[kde == 0]<-NA
+  # create a vector of raster values
+  kde_values <- raster::getValues(kde)
+  # sort values 
+  sortedValues <- sort(kde_values[!is.na(kde_values)],decreasing = TRUE)
+  # find cumulative sum up to ith location
+  sums <- cumsum(as.numeric(sortedValues))
+  # binary response is value in the probabily zone or not
+  p <- sum(sums <= prob * sums[length(sums)])
+  # Set values in raster to 1 or 0
+  kdeprob <- raster::setValues(kde, kde_values >= sortedValues[p])
+  # return new kde
+  return(kdeprob)}
+
+BH_95kde <- lapply(BH_kde,
+                   FUN = getContour,prob = 0.95)
+
+```
+
+<span style="color:pink">These next plots put MCP on top of KDE
+</span>
+```{r Big Hollow Map}
+
+plot(BH_kde[[1]])+
+  plot(BHmcp[1,],add = TRUE)
+
+
+```
+<span style="color:blue"> Time to overlap KDE onto the base map. Code found from http://data-analytics.net/cep/Schedule_files/geospatial.html </span>
+
+```{r KDE with BH map, eval=FALSE, include=FALSE}
+BHkde<- BHmap +
+  stat_density2d(aes(x = Longitude, y = Latitude, fill = ..level..,alpha=..level..), bins = 10, geom = "polygon", data =Big_Hollow) +
+  scale_fill_gradient(low = "red", high = "green")+
+  ggtitle("Big Hollow, TN")
+```
+
+```{BHmapkde include=FALSE}
+ggsave("BHMapKDEimage.jpg", plot = BHkde, dpi = 300, limitsize = TRUE)
+```
+
+![Compleated KDE Heatmap](/Users/Kirstenglish/Desktop/BHMapKDEimage.jpg)
+
+
+
+
+
+Wall Branch, TN
+
+```{r Wall Branch setup, include=FALSE}
+Wall_Branch <- read_csv("/Users/Kirstenglish/Desktop/Wall Branch.csv")
+View(Wall_Branch)
+```
+
+
+Create the basemap for the site location. This site is Wall Branch stream in Tennesse
+
+```{r Get WB basemap}
+basemap<- get_map((location = " 2561 Alex Overlook Way
+Clarksville, TN 37043, 36.497818, -87.267428"), zoom=15, maptype = "satellite")
+ggmap(basemap)
+
+```
+
+<span style="color:blue"> LOWA encounter cooridinates on the basemap we just created.</span>
+
+```{r WB base map with LOWAlocation points}
+#time to put points on the map
+WBmap<-ggmap(basemap)+ geom_point(data=Wall_Branch, aes(Longitude, Latitude)) +
+  geom_point(data = Wall_Branch, aes(Longitude, Latitude), color= "black", size = 0.1) +
+  theme(axis.title = element_text(face="bold")) + labs(x="Longitude", y="Latitude") +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) + theme_classic()
+plot(WBmap)
+```
+
+ 
+```{r WBsp}
+WBpts <- sp::SpatialPoints(coords = cbind(Wall_Branch$Longitude, Wall_Branch$Latitude),
+                           proj4string = sp::CRS("+init=epsg:4326"))
+head(WBpts)
+
+WB_spdf <- sp::SpatialPointsDataFrame(WBpts, Wall_Branch)
+head(WB_spdf)
+
+WB_sep <- split(x = WB_spdf, f = WB_spdf$Name, drop = FALSE)
+```
+
+<span style="color:blue"> Time to make the MCP.</span>
+
+```{r WB MCP}
+WBmcp <- lapply(WB_sep, FUN = function(x){rgeos::gConvexHull(x)})
+
+##this makes polygon from the list of one when we told R that all variables are from one stream system
+WBmcp <- mapply(WBmcp, names(WBmcp), 
+                SIMPLIFY = FALSE,
+                FUN = function(x,y){x@polygons[[1]]@ID <- y
+                return(x)})
+WBmcp <- do.call(rbind,WBmcp)
+WBmcp <- SpatialPolygonsDataFrame(Sr = WBmcp,
+                                  data = data.frame(Bird = names(WBmcp)),
+                                  match.ID = FALSE)
+plot(WBmcp)
+
+```
+
+<span style="color:pink">Now that we have an MCP for the stream, onto KDE.</span>
+
+```{r WB KDE, warning=FALSE}
+bw <- lapply(WB_sep, FUN = function(x){ks::Hlscv(x@coords)})
+
+## Step two: generate kde
+WB_kde <-mapply(WB_sep,bw,
+                SIMPLIFY = FALSE,
+                FUN = function(x,y){
+                  raster(kde(x@coords,h=y))})
+# This code makes a custom function called getContour. 
+# Inputs:
+#    kde = kernel density estimate
+#    prob = probabily - default is 0.95
+
+getContour <- function(kde, prob = 0.95){
+  # set all values 0 to NA
+  kde[kde == 0]<-NA
+  # create a vector of raster values
+  kde_values <- raster::getValues(kde)
+  # sort values 
+  sortedValues <- sort(kde_values[!is.na(kde_values)],decreasing = TRUE)
+  # find cumulative sum up to ith location
+  sums <- cumsum(as.numeric(sortedValues))
+  # binary response is value in the probabily zone or not
+  p <- sum(sums <= prob * sums[length(sums)])
+  # Set values in raster to 1 or 0
+  kdeprob <- raster::setValues(kde, kde_values >= sortedValues[p])
+  # return new kde
+  return(kdeprob)}
+
+WB_95kde <- lapply(WB_kde,
+                   FUN = getContour,prob = 0.95)
+
+```
+
+<span style="color:pink">These next plots put MCP on top of KDE
+</span>
+```{r WB Map}
+## These next plots put MCP on top of KDE, (territory for this map is very linear)
+plot(WB_kde[[1]])+
+  plot(WBmcp[1,],add = TRUE)
+```
+<span style="color:blue"> Time to overlap KDE onto the base map. Code found from http://data-analytics.net/cep/Schedule_files/geospatial.html </span>
+
+```{r WB KDE with map}
+WBkde<-WBmap +
+  stat_density2d(aes(x = Longitude, y = Latitude, fill = ..level..,alpha=..level..), bins = 10, geom = "polygon", data = Wall_Branch) +
+  scale_fill_gradient(low = "red", high = "green")+
+  ggtitle("Wall Branch, TN")
+```
+
+```{r kdemap image, include=FALSE}
+ggsave("WBMapKDEimage.jpg", plot = WBkde, dpi = 300, limitsize = TRUE)
+```
+
+![Compleated KDE Heatmap](/Users/Kirstenglish/Desktop/WBMapKDEimage.jpg)
+
+
+
+
+
+

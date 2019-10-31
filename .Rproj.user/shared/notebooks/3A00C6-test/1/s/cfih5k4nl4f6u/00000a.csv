@@ -1,0 +1,5 @@
+"0","DCmap<-ggmap(basemap)+ geom_point(data=DryCreek, aes(Longitude, Latitude)) +"
+"0","  geom_point(data = DryCreek, aes(Longitude, Latitude), size = 0.1) +"
+"0","  theme(axis.title = element_text(face=""bold"")) + labs(x=""Longitude"", y=""Latitude"") +"
+"0","  theme(panel.border = element_rect(colour = ""black"", fill=NA, size=1)) + theme_bw()"
+"0","plot(DCmap)"

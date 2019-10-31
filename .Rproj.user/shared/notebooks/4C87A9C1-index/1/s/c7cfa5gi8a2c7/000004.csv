@@ -1,0 +1,5 @@
+"0","## These next plots put MCP on top of KDE, (territory for this map is very linear)"
+"0","plot(WB_kde[[1]])+"
+"0","  plot(WBmcp[1,],add = TRUE)"
+"1","integer(0)
+"
